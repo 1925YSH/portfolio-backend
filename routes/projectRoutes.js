@@ -73,6 +73,28 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ✅ PUT: Update By ID
+router.put('/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { title, description, techStack, github, demo } = req.body;
+    let updateData = {
+      title,
+      description,
+      techStack: techStack ? techStack.split(',').map(tech => tech.trim()) : [],
+      github,
+      demo,
+    };
+    
+    if (req.file) {
+      updateData.image = req.file.path;
+    }
 
+    const updatedProject = await Project.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    res.status(200).json(updatedProject);
+  } catch (err) {
+    console.error('❌ Error in PUT /api/projects/:id:', err);
+    res.status(500).json({ error: 'Failed to update project' });
+  }
+});
 
 module.exports = router;

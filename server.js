@@ -37,7 +37,12 @@ app.use('/uploads', express.static('uploads'));
 
 
 
-app.use('/api/projects',projectRoutes)
+app.use('/api/projects',projectRoutes);
+
+// Health check route for UptimeRobot and Render
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Backend is running smoothly!' });
+});
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,

@@ -9,7 +9,12 @@ router.post('/', async (req, res) => {
     const newContact = new Contact({ name, email, message });
     await newContact.save(); // save to db
 
-    await sendEmail ({ name, email, message }); // ⬅️ THIS LINE sends email
+    try {
+      await sendEmail({ name, email, message }); // ⬅️ THIS LINE sends email
+    } catch (emailErr) {
+      console.error("Warning: Email failed to send, but message saved to DB:", emailErr.message);
+      // We don't throw here, so the user still sees a success message!
+    }
     
     res.status(200).json({ message: 'Message sent successfully' });
   } catch (err) {

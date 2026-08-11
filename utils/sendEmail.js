@@ -1,32 +1,29 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
-
 const sendEmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 465,
-    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_MAIL,     // Your Gmail
-      pass: process.env.SMTP_PASSWORD  // App password
-    }
+  // Using the Web3Forms Access Key provided by the user
+  const WEB3FORMS_ACCESS_KEY = process.env.WEB3FORMS_ACCESS_KEY || "eb782e85-8b0f-4244-96f1-1d0acc742cb1";
+
+  const response = await fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: options.subject || `New Contact Message from ${options.name}`,
+      from_name: options.name,
+      email: options.email, // This is the sender's email
+      message: options.message,
+    }),
   });
 
-  const mailOptions = {
-    from: `"Portfolio Contact" <${process.env.SMTP_MAIL}>`,
-    to: process.env.SMTP_MAIL, // ✅ send to yourself, not visitor
-    subject: options.subject || `New Contact Message from ${options.name}`,
-    text: `You received a new message:
+  const data = await response.json();
+  
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || "Failed to send email via Web3Forms");
+  }
 
-Name: ${options.name}
-Email: ${options.email}
-
-Message:
-${options.message}`
-  };
-
-  await transporter.sendMail(mailOptions);
-  console.log('✅ Email sent to your inbox');
+  console.log("✅ Email sent successfully via Web3Forms");
 };
 
 module.exports = sendEmail;

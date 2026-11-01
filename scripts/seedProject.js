@@ -14,11 +14,11 @@ async function main() {
     await mongoose.connect(uri);
     console.log('Connected to MongoDB');
 
-    const existing = await Project.findOne({ title: 'AI CareerOS' });
-    if (existing) {
-      console.log('Project AI CareerOS already exists in DB:', existing._id);
-    } else {
-      const newProj = new Project({
+    const githubLinks = "https://github.com/1925YSH/careerOS-frontend, https://github.com/1925YSH/careerOs-backend";
+
+    const updated = await Project.findOneAndUpdate(
+      { title: 'AI CareerOS' },
+      {
         title: "AI CareerOS",
         description: "An autonomous career intelligence operating system featuring transparent hybrid AI job matching, autonomous career portal web ingestion, an ATS resume diagnostic center, 7-day interview roadmaps, employer recruitment pipelines, and Stripe monetization.",
         techStack: [
@@ -33,16 +33,15 @@ async function main() {
           "Stripe"
         ],
         image: "uploads/career-os-preview.png",
-        github: "https://github.com/1925YSH/CareerAI",
+        github: githubLinks,
         demo: ""
-      });
-      await newProj.save();
-      console.log('Successfully inserted AI CareerOS into MongoDB! ID:', newProj._id);
-    }
+      },
+      { upsert: true, new: true }
+    );
 
-    const all = await Project.find({});
-    console.log(`Total projects in DB: ${all.length}`);
-    all.forEach(p => console.log(`- ${p.title} (${p._id})`));
+    console.log('✅ Updated AI CareerOS in MongoDB:');
+    console.log('ID:', updated._id);
+    console.log('GitHub Links:', updated.github);
 
     await mongoose.disconnect();
   } catch (err) {
